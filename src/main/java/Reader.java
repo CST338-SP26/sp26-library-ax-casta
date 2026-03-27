@@ -33,38 +33,46 @@ public class Reader {
     }
 
     //ADD-BOOK
-    public Code addBook(Book book){
-        if (hasBook(book)){
+    public Code addBook(Book book) {
+        if (hasBook(book)) {
             return Code.BOOK_ALREADY_CHECKED_OUT_ERROR;
-        }
-        else{
+        } else {
             books.add(book);
             return Code.SUCCESS;
         }
     }
 
     //REMOVE-BOOK
-    public Code removeBook(Book book){
-        if(!hasBook(book)){
+    public Code removeBook(Book book) {
+        if (!hasBook(book)) {
             return Code.READER_DOESNT_HAVE_BOOK_ERROR;
         }
         boolean removeSuccess = books.remove(book);
-        if (removeSuccess){
+        if (removeSuccess) {
             return Code.SUCCESS;
-        }
-        else{
+        } else {
             return Code.READER_COULD_NOT_REMOVE_BOOK_ERROR;
         }
     }
 
     //HAS-BOOK
-    public boolean hasBook(Book book){
+    public boolean hasBook(Book book) {
         return books.contains(book);
     }
 
     //TO-STRING
     @Override
-    public String toString(){return "java";}
+    public String toString() {
+        String booksString = "";
+        for (int i = 0; i < books.size(); i++) {
+            if (i == books.size() - 1) {
+                booksString += books.get(i);
+            } else {
+                booksString += books.get(i) + ", ";
+            }
+        }
+        return name + " (#" + cardNumber + ") has checked out {" + booksString + "}";
+    }
 
     //EQUALS
     @Override
@@ -81,7 +89,7 @@ public class Reader {
     }
 
     //GETTERS AND SETTERS
-    public int getBookCount(){
+    public int getBookCount() {
         return books.size();
     }
 
