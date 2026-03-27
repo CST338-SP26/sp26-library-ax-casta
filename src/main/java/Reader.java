@@ -34,6 +34,7 @@ public class Reader {
 
     //ADD-BOOK
     public Code addBook(Book book) {
+        //checks if reader has the book already, otherwise it is successfully added
         if (hasBook(book)) {
             return Code.BOOK_ALREADY_CHECKED_OUT_ERROR;
         } else {
@@ -44,9 +45,11 @@ public class Reader {
 
     //REMOVE-BOOK
     public Code removeBook(Book book) {
+        //checks if the reader has the book so it can be removed. If not then error
         if (!hasBook(book)) {
             return Code.READER_DOESNT_HAVE_BOOK_ERROR;
         }
+        //checks for a successful removal or an error
         boolean removeSuccess = books.remove(book);
         if (removeSuccess) {
             return Code.SUCCESS;
@@ -56,6 +59,7 @@ public class Reader {
     }
 
     //HAS-BOOK
+    //checks if the reader has a book or not
     public boolean hasBook(Book book) {
         return books.contains(book);
     }
@@ -63,14 +67,16 @@ public class Reader {
     //TO-STRING
     @Override
     public String toString() {
-        String booksString = "";
+        //loop to turn books into string
+        StringBuilder booksString = new StringBuilder();
         for (int i = 0; i < books.size(); i++) {
             if (i == books.size() - 1) {
-                booksString += books.get(i);
+                booksString.append(books.get(i));
             } else {
-                booksString += books.get(i) + ", ";
+                booksString.append(books.get(i)).append(", ");
             }
         }
+        //formats into [NAME] (#[CARD NUMBER]) has checked out {[BOOKS]}
         return name + " (#" + cardNumber + ") has checked out {" + booksString + "}";
     }
 
