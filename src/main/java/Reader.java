@@ -33,7 +33,15 @@ public class Reader {
     }
 
     //ADD-BOOK
-    //public Code addBook(Book book){}
+    public Code addBook(Book book){
+        if (hasBook(book)){
+            return Code.BOOK_ALREADY_CHECKED_OUT_ERROR;
+        }
+        else{
+            books.add(book);
+            return Code.SUCCESS;
+        }
+    }
     //REMOVE-BOOK
     //public Code removeBook(Book book){}
     //HAS-BOOK
@@ -58,7 +66,9 @@ public class Reader {
     }
 
     //GETTERS AND SETTERS
-    //getBookCount()
+    public int getBookCount(){
+        return books.size();
+    }
 
     public int getCardNumber() {
         return cardNumber;
