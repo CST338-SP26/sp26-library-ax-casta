@@ -42,10 +42,25 @@ public class Reader {
             return Code.SUCCESS;
         }
     }
+
     //REMOVE-BOOK
-    //public Code removeBook(Book book){}
+    public Code removeBook(Book book){
+        if(!hasBook(book)){
+            return Code.READER_DOESNT_HAVE_BOOK_ERROR;
+        }
+        boolean removeSuccess = books.remove(book);
+        if (removeSuccess){
+            return Code.SUCCESS;
+        }
+        else{
+            return Code.READER_COULD_NOT_REMOVE_BOOK_ERROR;
+        }
+    }
+
     //HAS-BOOK
-    //public boolean hasBook(Book book){}
+    public boolean hasBook(Book book){
+        return books.contains(book);
+    }
 
     //TO-STRING
     @Override
