@@ -23,8 +23,24 @@ public class Shelf {
     }
 
     //METHODS
-    public Code addBook(Book book){return null;}
+    public Code addBook(Book book){
+        if (books.containsKey(book)){
+            books.put(book, books.get(book) + 1);
+            return Code.SUCCESS;
+        }
+        else{
+            if(book.getSubject().equals(this.subject)){
+                books.put(book, 1);
+                return Code.SUCCESS;
+            }
+            else{
+                return Code.SHELF_SUBJECT_MISMATCH_ERROR;
+            }
+        }
+    }
     public int getBookCount(Book book){return 0;}
+    public Code removeBook(Book book){return null;}
+    public String listBooks(){return "";}
 
     //EQUALS
     @Override
