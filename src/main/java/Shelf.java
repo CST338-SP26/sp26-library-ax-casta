@@ -76,7 +76,26 @@ public class Shelf {
     }
 
     //LISTBOOKS
-    public String listBooks(){return "";}
+    public String listBooks(){
+        int bookNum = 0;
+        String bookList = "";
+        //builds bookNum
+        for(Integer count : books.values()){
+            bookNum += count;
+        }
+        //builds bookList
+        for(Book book : books.keySet()){
+            bookList = bookList + "\n" + book.toString() + " " + books.get(book);
+        }
+        //case if bookNum is 1
+        if (bookNum == 1){
+            return bookNum + " book on shelf: " + this.toString() + bookList;
+        }
+        //case if bookNum is not 1
+        else{
+            return bookNum + " books on shelf: " + this.toString() + bookList;
+        }
+    }
 
     //EQUALS
     @Override
