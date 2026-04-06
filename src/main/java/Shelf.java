@@ -23,23 +23,47 @@ public class Shelf {
     }
 
     //METHODS
+    //ADDBOOK
     public Code addBook(Book book){
+        //checks if hashmap contains book
         if (books.containsKey(book)){
+            //increments books hashmap
             books.put(book, books.get(book) + 1);
+            System.out.println(book.toString() + " added to shelf " + this.toString());
             return Code.SUCCESS;
         }
+        //checks if book equals this subject
+        else if(book.getSubject().equals(this.subject)){
+            books.put(book, 1);
+            System.out.println(book.toString() + " added to shelf " + this.toString());
+            return Code.SUCCESS;
+        }
+        //error
         else{
-            if(book.getSubject().equals(this.subject)){
-                books.put(book, 1);
-                return Code.SUCCESS;
-            }
-            else{
-                return Code.SHELF_SUBJECT_MISMATCH_ERROR;
-            }
+            return Code.SHELF_SUBJECT_MISMATCH_ERROR;
         }
     }
+    //REMOVEBOOK
+    public Code removeBook(Book book){
+        //checks if hashmap does not contain book
+        if (!books.containsKey(book)){
+            System.out.println(book.getTitle() + " is not on shelf " + this.subject);
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
+        }
+        //checks if book count is 0
+        else if(getBookCount(book) == 0){
+            System.out.println("No copies of " + book.getTitle() + " remain on shelf " + this.subject);
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
+        }
+        //successful book removal
+        else{
+            books.put(book, books.get(book) - 1);
+            System.out.println(book.getTitle() + " successfully removed from shelf " + this.subject);
+            return Code.SUCCESS;
+        }
+    }
+
     public int getBookCount(Book book){return 0;}
-    public Code removeBook(Book book){return null;}
     public String listBooks(){return "";}
 
     //EQUALS
