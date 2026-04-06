@@ -51,13 +51,13 @@ public class Shelf {
         if (books.containsKey(book)){
             //increments books hashmap
             books.put(book, books.get(book) + 1);
-            System.out.println(book.toString() + " added to shelf " + this.toString());
+            System.out.println(book.toString() + " added to shelf " + this);
             return Code.SUCCESS;
         }
         //checks if book equals this subject
         else if(book.getSubject().equals(this.subject)){
             books.put(book, 1);
-            System.out.println(book.toString() + " added to shelf " + this.toString());
+            System.out.println(book + " added to shelf " + this);
             return Code.SUCCESS;
         }
         //error
@@ -124,11 +124,11 @@ public class Shelf {
         }
         //case if bookNum is 1
         if (bookNum == 1){
-            return bookNum + " book on shelf: " + this.toString() + bookList;
+            return bookNum + " book on shelf: " + this + bookList;
         }
         //case if bookNum is not 1
         else{
-            return bookNum + " books on shelf: " + this.toString() + bookList;
+            return bookNum + " books on shelf: " + this + bookList;
         }
     }
 
