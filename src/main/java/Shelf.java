@@ -22,7 +22,6 @@ public class Shelf {
     public Shelf() {
     }
 
-    //METHODS
     //ADDBOOK
     public Code addBook(Book book){
         //checks if hashmap contains book
@@ -43,6 +42,7 @@ public class Shelf {
             return Code.SHELF_SUBJECT_MISMATCH_ERROR;
         }
     }
+
     //REMOVEBOOK
     public Code removeBook(Book book){
         //checks if hashmap does not contain book
@@ -63,7 +63,19 @@ public class Shelf {
         }
     }
 
-    public int getBookCount(Book book){return 0;}
+    //GETBOOKCOUNT
+    public int getBookCount(Book book){
+        //checks if hashmap does not contain book
+        if (!books.containsKey(book)) {
+            return -1;
+        }
+        //returns book
+        else{
+            return books.get(book);
+        }
+    }
+
+    //LISTBOOKS
     public String listBooks(){return "";}
 
     //EQUALS
