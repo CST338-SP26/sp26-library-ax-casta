@@ -1,5 +1,7 @@
 import Utilities.Code;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,7 +99,6 @@ public class Library {
         }
     }
 
-
     //BOOK METHODS
     public Code addBook(Book book){return null;}
     public Code addBookToShelf(Book book, Shelf shelf){return null;}
@@ -123,7 +124,51 @@ public class Library {
     public int listShelves(){return 0;}
 
     //INIT METHODS
-    public Code init(String filename){return null;}
+    //INIT
+    public Code init(String filename){
+        try{
+            Scanner scan = new Scanner(new File(filename));
+
+            int bookCount = convertInt(scan.nextLine(), Code.BOOK_COUNT_ERROR);
+            if(bookCount < 0){
+                return errorCode(bookCount);
+            }
+
+            Code bookCode = initBooks(bookCount, scan);
+            if (bookCode != Code.SUCCESS){
+                return bookCode;
+            }
+            listBooks();
+
+            int shelfCount = convertInt(scan.nextLine(), Code.SHELF_COUNT_ERROR);
+            if (shelfCount < 0){
+                return errorCode(shelfCount);
+            }
+
+            Code shelfCode = initShelves(shelfCount, scan);
+            if (shelfCode != Code.SUCCESS){
+                return shelfCode;
+            }
+            listShelves(true);
+
+            int readerCount = convertInt(scan.nextLine(), Code.READER_COUNT_ERROR);
+            if (readerCount < 0){
+                return errorCode(readerCount);
+            }
+
+            Code readerCode = initReader(readerCount, scan);
+            if(readerCode != Code.SUCCESS){
+                return readerCode;
+            }
+            listReaders(true);
+
+            scan.close();
+            return Code.SUCCESS;
+        }
+        catch (FileNotFoundException e){
+            return Code.FILE_NOT_FOUND_ERROR;
+        }
+    }
 
     //INIT-BOOKS
     private Code initBooks(int bookCount, Scanner scan){
@@ -157,7 +202,38 @@ public class Library {
         }
         return Code.SUCCESS;
     }
-    private Code initReader(int readerCount, Scanner scan){return null;}
+    //INIT-READER
+    private Code initReader(int readerCount, Scanner scan){
+        if(readerCount <= 0){
+            return Code.READER_COUNT_ERROR;
+        }
+        for(int i = 0; i < readerCount; i++) {
+            String line = scan.nextLine();
+            String[] tokens = line.split(",");
+
+            int cardNumber = convertInt(tokens[Reader.CARD_NUMBER_], Code.READER_COUNT_ERROR);
+            String name = tokens[Reader.NAME_];
+            String phone = tokens[Reader.PHONE_];
+
+            Reader reader = new Reader(cardNumber, name, phone);
+            this.addReader(reader);
+
+            int bookCount = convertInt(tokens[Reader.BOOK_COUNT_], Code.READER_COUNT_ERROR);
+            for (int j = 0; j < bookCount; j++) {
+                int index = Reader.BOOK_START_ + (j * 2);
+                String isbn = tokens[index];
+                Book book = getBookByISBN(isbn);
+                if (book == null) {
+                    System.out.println("ERROR");
+                    continue;
+                }
+                LocalDate dueDate = convertDate(tokens[index + 1], Code.DATE_CONVERSION_ERROR);
+                book.setDueDate(dueDate);
+                checkOutBook(reader, book);
+            }
+        }
+        return Code.SUCCESS;
+    }
 
     //INIT-SHELVES
     private Code initShelves(int shelfCount, Scanner scan){
