@@ -100,12 +100,78 @@ public class Library {
     }
 
     //BOOK METHODS
-    public Code addBook(Book book){return null;}
-    public Code addBookToShelf(Book book, Shelf shelf){return null;}
-    public int listBooks(){return 0;}
-    public Code checkOutBook(Reader reader, Book book){return null;}
-    public Book getBookByISBN(String string){return null;}
+    //ADD-BOOK
+    public Code addBook(Book newBook){
+        if(books.containsKey(newBook)){
+            int count = books.get(newBook) + 1;
+            books.put(newBook, count);
+            System.out.println(count + " copies of " + newBook + " in the stacks");
+        }
+        else{
+            books.put(newBook, 1);
+            System.out.println(newBook + " added to the stacks.");
+        }
+
+        Shelf shelf = getShelf(newBook.getSubject());
+        if(shelf != null){
+            shelf.addBook(newBook);
+            return Code.SUCCESS;
+        }
+        else{
+            System.out.println("No shelf for " + newBook.getSubject() + " books");
+            return Code.SHELF_EXISTS_ERROR;
+        }
+    }
+
+    //CHECK-OUT-BOOK
+    public Code checkOutBook(Reader reader, Book book){
+        if(reader == null){
+            System.out.println("reader doesn't have an account here");
+            return Code.READER_NOT_IN_LIBRARY_ERROR;
+        }
+        if(!readers.contains(reader)){
+            System.out.println(reader.getName() + " doesn't have an account here");
+            return Code.READER_NOT_IN_LIBRARY_ERROR;
+        }
+        if(reader.getBooks().size() >= LENDING_LIMIT){
+            System.out.println(reader.getName() + " has reached the lending limit, (" + LENDING_LIMIT + ")");
+            return Code.BOOK_LIMIT_REACHED_ERROR;
+        }
+        if(!books.containsKey(book)){
+            System.out.println("ERROR: could not find " + book);
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
+        }
+
+        Shelf shelf = getShelf(book.getSubject());
+        if(shelf == null){
+            System.out.println("no shelf for " + book.getSubject() + " books!");
+            return Code.SHELF_EXISTS_ERROR;
+        }
+        if(shelf.getBookCount(book) < 1){
+            System.out.println("ERROR: no copies of " + book + " remain");
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
+        }
+
+        Code addCode = reader.addBook(book);
+        if(addCode != Code.SUCCESS){
+            System.out.println("Couldn't checkout " + book);
+            return addCode;
+        }
+
+        Code removeCode = shelf.removeBook(book);
+        if(removeCode == Code.SUCCESS){
+            System.out.println(book + " checked out successfully");
+        }
+        return removeCode;
+    }
+    //RETURN-BOOK
     public Code returnBook(Reader reader, Book book){return null;}
+
+
+    public Code addBookToShelf(Book book, Shelf shelf){return null;}
+
+    public int listBooks(){return 0;}
+    public Book getBookByISBN(String string){return null;}
     public Code returnBook(Book book){return null;}
 
     //READER METHODS
@@ -266,6 +332,7 @@ public class Library {
     }
 
     //METHODS
+    //ERROR-CODE
     private Code errorCode(int codeNumber) {
         for (Code code : Code.values()) {
             if (code.getCode() == codeNumber) {
@@ -274,6 +341,12 @@ public class Library {
         }
         return Code.UNKNOWN_ERROR;
     }
-    static public int getLibraryCardNumber(){return 0;}
-    public String getName(){return name;}
+    //GET-LIBRARY-CARD-NUMBER
+    public static int getLibraryCardNumber() {
+        return libraryCard + 1;
+    }
+    //GET-NAME
+    public String getName(){
+        return name;
+    }
 }
