@@ -250,11 +250,78 @@ public class Library {
     }
 
     //READER METHODS
-    public Code addReader(Reader reader){return null;}
-    public int listReaders(){return 0;}
-    public int listReaders(boolean bool){return 0;}
-    public Reader getReaderByCard(int integer){return null;}
-    public Code removeReader(Reader reader){return null;}
+    //ADD-READER
+    public Code addReader(Reader reader){
+        if(readers.contains(reader)){
+            System.out.println(reader.getName() + " already has an account!");
+            return Code.READER_ALREADY_EXISTS_ERROR;
+        }
+
+        for(Reader r : readers){
+            if(r.getCardNumber() == reader.getCardNumber()){
+                System.out.println(r.getName() + " and " + reader.getName() + " have the same card number!");
+                return Code.READER_CARD_NUMBER_ERROR;
+            }
+        }
+
+        readers.add(reader);
+        System.out.println(reader.getName() + " added to the library!");
+
+        if(reader.getCardNumber() > libraryCard){
+            libraryCard = reader.getCardNumber();
+        }
+
+        return Code.SUCCESS;
+    }
+
+    //REMOVE-READER
+    public Code removeReader(Reader reader){
+        if(!readers.contains(reader)){
+            System.out.println(reader + " is not part of this Library");
+            return Code.READER_NOT_IN_LIBRARY_ERROR;
+        }
+
+        if(reader.getBooks().size() > 0){
+            System.out.println(reader.getName() + " must return all books!");
+            return Code.READER_STILL_HAS_BOOKS_ERROR;
+        }
+
+        readers.remove(reader);
+        return Code.SUCCESS;
+    }
+
+    //LIST-READERS
+    public int listReaders(boolean showBooks){
+        if(!showBooks){
+            return listReaders();
+        }
+
+        for(Reader reader : readers){
+            System.out.println(reader.getName() + "(#" + reader.getCardNumber() + ")  has the following books:  ");
+            System.out.println(reader.getBooks());
+        }
+
+        return readers.size();
+    }
+
+    //LIST-READERS
+    public int listReaders(){
+        for(Reader reader : readers){
+            System.out.println(reader);
+        }
+        return readers.size();
+    }
+
+    //GET-READER-BY-CARD
+    public Reader getReaderByCard(int cardNumber){
+        for(Reader reader : readers){
+            if(reader.getCardNumber() == cardNumber){
+                return reader;
+            }
+        }
+        System.out.println("Could not find a reader with card #" + cardNumber);
+        return null;
+    }
 
     //SHELF METHODS
     public Code addShelf(Shelf shelf){return null;}
