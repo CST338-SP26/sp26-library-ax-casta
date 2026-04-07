@@ -8,6 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Author: Alexander Castaneda
+ * Title: Project_01 Part 4 - Library
+ * Date: 4/6/2026
+ */
+
 public class Library {
     //CONSTANTS
     public static final int LENDING_LIMIT = 5;
@@ -126,7 +132,7 @@ public class Library {
     //CHECK-OUT-BOOK
     public Code checkOutBook(Reader reader, Book book){
         if(reader == null){
-            System.out.println("reader doesn't have an account here");
+            System.out.println("Reader doesn't have an account here");
             return Code.READER_NOT_IN_LIBRARY_ERROR;
         }
         if(!readers.contains(reader)){
@@ -143,6 +149,7 @@ public class Library {
         }
 
         Shelf shelf = getShelf(book.getSubject());
+
         if(shelf == null){
             System.out.println("no shelf for " + book.getSubject() + " books!");
             return Code.SHELF_EXISTS_ERROR;
@@ -151,7 +158,6 @@ public class Library {
             System.out.println("ERROR: no copies of " + book + " remain");
             return Code.BOOK_NOT_IN_INVENTORY_ERROR;
         }
-
         Code addCode = reader.addBook(book);
         if(addCode != Code.SUCCESS){
             System.out.println("Couldn't checkout " + book);
@@ -164,15 +170,84 @@ public class Library {
         }
         return removeCode;
     }
+
     //RETURN-BOOK
-    public Code returnBook(Reader reader, Book book){return null;}
+    public Code returnBook(Reader reader, Book book){
+        if(!reader.hasBook(book)){
+            System.out.println(reader.getName() + " doesn't have " + book + " checked out");
+            return Code.READER_DOESNT_HAVE_BOOK_ERROR;
+        }
+        if(!books.containsKey(book)){
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
+        }
 
+        System.out.println(reader.getName() + " is returning " + book);
 
-    public Code addBookToShelf(Book book, Shelf shelf){return null;}
+        Code code = reader.removeBook(book);
+        if(code == Code.SUCCESS){
+            return returnBook(book);
+        }
+        else{
+            System.out.println("Could not return " + book);
+            return code;
+        }
+    }
 
-    public int listBooks(){return 0;}
-    public Book getBookByISBN(String string){return null;}
-    public Code returnBook(Book book){return null;}
+    //ADD-BOOK-TO-SHELF
+    public Code addBookToShelf(Book book, Shelf shelf){
+        Code returnCode = returnBook(book);
+        if(returnCode == Code.SUCCESS){
+            return Code.SUCCESS;
+        }
+
+        if(!shelf.getSubject().equalsIgnoreCase(book.getSubject())){
+            return Code.SHELF_SUBJECT_MISMATCH_ERROR;
+        }
+
+        Code code = shelf.addBook(book);
+        if(code == Code.SUCCESS){
+            System.out.println(book + " added to shelf");
+            return Code.SUCCESS;
+        }
+        else{
+            System.out.println("Could not add " + book + " to shelf");
+            return code;
+        }
+    }
+
+    //LIST-BOOKS
+    public int listBooks(){
+        int total = 0;
+
+        for(Book book : books.keySet()){
+            int count = books.get(book);
+            total += count;
+            System.out.println(count + " copies of " + book);
+        }
+        return total;
+    }
+
+    //GET-BOOK-BY-ISBN
+    public Book getBookByISBN(String string){
+        for(Book book : books.keySet()){
+            if(book.getISBN().equals(string)){
+                return book;
+            }
+        }
+        System.out.println("ERROR: Could not find a book with isbn: " + string);
+        return null;
+    }
+
+    //RETURN-BOOK
+    public Code returnBook(Book book){
+        Shelf shelf = getShelf(book.getSubject());
+
+        if(shelf == null){
+            System.out.println("No shelf for " + book);
+            return Code.SHELF_EXISTS_ERROR;
+        }
+        return shelf.addBook(book);
+    }
 
     //READER METHODS
     public Code addReader(Reader reader){return null;}
