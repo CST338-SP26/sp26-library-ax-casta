@@ -106,7 +106,7 @@ public class Library {
 
     //BOOK METHODS
     //ADD-BOOK
-    public void addBook(Book newBook){
+    public Code addBook(Book newBook){
         if(books.containsKey(newBook)){
             int count = books.get(newBook) + 1;
             books.put(newBook, count);
@@ -116,75 +116,78 @@ public class Library {
             books.put(newBook, 1);
             System.out.println(newBook + " added to the stacks.");
         }
-
         Shelf shelf = getShelf(newBook.getSubject());
         if(shelf != null){
             shelf.addBook(newBook);
+            return Code.SUCCESS;
         }
         else{
             System.out.println("No shelf for " + newBook.getSubject() + " books");
+            return Code.SHELF_EXISTS_ERROR;
         }
     }
 
     //CHECK-OUT-BOOK
-    public void checkOutBook(Reader reader, Book book){
+    public Code checkOutBook(Reader reader, Book book){
         if(reader == null){
             System.out.println("Reader doesn't have an account here");
-            return;
+            return Code.READER_NOT_IN_LIBRARY_ERROR;
         }
         if(!readers.contains(reader)){
             System.out.println(reader.getName() + " doesn't have an account here");
-            return;
+            return Code.READER_NOT_IN_LIBRARY_ERROR;
         }
         if(reader.getBooks().size() >= LENDING_LIMIT){
             System.out.println(reader.getName() + " has reached the lending limit, (" + LENDING_LIMIT + ")");
-            return;
+            return Code.BOOK_LIMIT_REACHED_ERROR;
         }
         if(!books.containsKey(book)){
             System.out.println("ERROR: could not find " + book);
-            return;
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
         }
 
         Shelf shelf = getShelf(book.getSubject());
 
         if(shelf == null){
             System.out.println("no shelf for " + book.getSubject() + " books!");
-            return;
+            return Code.SHELF_EXISTS_ERROR;
         }
         if(shelf.getBookCount(book) < 1){
             System.out.println("ERROR: no copies of " + book + " remain");
-            return;
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
         }
         Code addCode = reader.addBook(book);
         if(addCode != Code.SUCCESS){
             System.out.println("Couldn't checkout " + book);
-            return;
+            return addCode;
         }
 
         Code removeCode = shelf.removeBook(book);
         if(removeCode == Code.SUCCESS){
             System.out.println(book + " checked out successfully");
         }
+        return removeCode;
     }
 
     //RETURN-BOOK
-    public void returnBook(Reader reader, Book book){
+    public Code returnBook(Reader reader, Book book){
         if(!reader.hasBook(book)){
             System.out.println(reader.getName() + " doesn't have " + book + " checked out");
-            return;
+            return Code.READER_DOESNT_HAVE_BOOK_ERROR;
         }
         if(!books.containsKey(book)){
-            return;
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
         }
 
         System.out.println(reader.getName() + " is returning " + book);
 
         Code code = reader.removeBook(book);
         if(code == Code.SUCCESS){
-            returnBook(book);
+            return returnBook(book);
         }
         else{
             System.out.println("Could not return " + book);
+            return code;
         }
     }
 
