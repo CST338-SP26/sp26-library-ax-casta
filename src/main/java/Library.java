@@ -26,6 +26,7 @@ public class Library {
     }
 
     //CONVERTER METHODS
+    //CONVERT-INT
     public static int convertInt(String string, Code code){
         try {
             int convertedInt = Integer.parseInt(string);
@@ -58,7 +59,43 @@ public class Library {
             }
         }
     }
-    public static LocalDate convertDate(String string, Code code){return null;}
+    //CONVERT-DATE
+    public static LocalDate convertDate(String string, Code code){
+        if(string.equals("0000")) {
+            return LocalDate.of(1970, 1, 1);
+        }
+        //splits the string by "-" from format "yyyy-mm-dd"
+        String[] datePieces = string.split("-");
+
+        //checks if the string was not broken up into 3 pieces
+        if(datePieces.length != 3){
+            System.out.println("ERROR: date conversion error, could not parse " + string);
+            System.out.println("Using default date (01-jan-1970)");
+            return LocalDate.of(1970, 1, 1);
+        }
+        //converts pieces into integers
+        int year = convertInt(datePieces[0], code);
+        int month = convertInt(datePieces[1], code);
+        int day = convertInt(datePieces[2], code);
+
+        //checks if pieces are less than 0
+        if (year < 0 || month < 0 || day < 0){
+            if (year < 0) {
+                System.out.println("Error converting date: Year " + year);
+            }
+            if (month < 0) {
+                System.out.println("Error converting date: Month " + month);
+            }
+            if (day < 0) {
+                System.out.println("Error converting date: Day " + day);
+            }
+            System.out.println("Using default date (01-jan-1970)");
+            return LocalDate.of(1970, 1, 1);
+        }
+        else{
+            return LocalDate.of(year, month, day);
+        }
+    }
 
 
     //BOOK METHODS
