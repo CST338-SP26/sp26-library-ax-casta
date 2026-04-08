@@ -3,6 +3,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -44,6 +46,8 @@ class LibraryTest {
 
     @Test
     void init_goodFile_test() {
+        Code result = csumb.init(library00);
+        assertEquals(Code.SUCCESS, result);
     }
 
     @Test
@@ -52,6 +56,12 @@ class LibraryTest {
 
     @Test
     void returnBook() {
+        csumb.init(library00);
+        Reader reader = csumb.getReaderByCard(1);
+        Book book = csumb.getBookByISBN("42-w-87");
+        csumb.checkOutBook(reader, book);
+        Code result = csumb.returnBook(reader, book);
+        assertNotNull(result);
     }
 
     @Test
@@ -60,14 +70,27 @@ class LibraryTest {
 
     @Test
     void listBooks() {
+        csumb.init(library00);
+        int total = csumb.listBooks();
+        assertTrue(total > 0);
     }
 
     @Test
     void checkOutBook() {
+        csumb.init(library00);
+        Reader reader = csumb.getReaderByCard(1);
+        Book book = csumb.getBookByISBN("42-w-87");
+        Code result = csumb.checkOutBook(reader, book);
+        assertNotNull(result);
     }
 
     @Test
     void getBookByISBN() {
+        csumb.init(library00);
+        Book book = csumb.getBookByISBN("e1337");
+        assertNotNull(book);
+        Book missing = csumb.getBookByISBN("fake");
+        assertNull(missing);
     }
 
     @Test
@@ -76,6 +99,10 @@ class LibraryTest {
 
     @Test
     void addShelf() {
+        Code result = csumb.addShelf("Fantasy");
+        assertEquals(Code.SUCCESS, result);
+        Shelf shelf = csumb.getShelf("Fantasy");
+        assertNotNull(shelf);
     }
 
     @Test
@@ -88,6 +115,11 @@ class LibraryTest {
 
     @Test
     void testGetShelf() {
+        csumb.init(library00);
+        Shelf shelf = csumb.getShelf(1);
+        assertNotNull(shelf);
+        Shelf missing = csumb.getShelf(999);
+        assertNull(missing);
     }
 
     @Test
@@ -104,21 +136,40 @@ class LibraryTest {
 
     @Test
     void addReader() {
+        Reader reader = new Reader(100, "Alex", "123");
+        Code result = csumb.addReader(reader);
+        assertEquals(Code.SUCCESS, result);
+        Reader found = csumb.getReaderByCard(100);
+        assertNotNull(found);
     }
 
     @Test
     void removeReader() {
+        Reader reader = new Reader(101, "Test", "123");
+        csumb.addReader(reader);
+        Code result = csumb.removeReader(reader);
+        assertEquals(Code.SUCCESS, result);
     }
 
     @Test
     void convertInt() {
+        int value = Library.convertInt("10", Code.BOOK_COUNT_ERROR);
+        assertEquals(10, value);
+        int error = Library.convertInt("bad", Code.BOOK_COUNT_ERROR);
+        assertTrue(error < 0);
     }
 
     @Test
     void convertDate() {
+        LocalDate date = Library.convertDate("2020-10-10", Code.DATE_CONVERSION_ERROR);
+        assertNotNull(date);
+        LocalDate badDate = Library.convertDate("bad-date", Code.DATE_CONVERSION_ERROR);
+        assertNotNull(badDate);
     }
 
     @Test
     void getLibraryCardNumber() {
+        int num = Library.getLibraryCardNumber();
+        assertTrue(num > 0);
     }
 }

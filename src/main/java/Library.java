@@ -37,8 +37,10 @@ public class Library {
     //CONVERT-INT
     public static int convertInt(String recordCountString, Code code){
         try {
+            //attempts to return an int version of string input
             return Integer.parseInt(recordCountString);
         }
+        //catches errors resulting from attempt
         catch(NumberFormatException e){
             if(code == Code.BOOK_COUNT_ERROR){
                 System.out.println("Value which caused the error: " + recordCountString);
@@ -85,7 +87,7 @@ public class Library {
         int month = convertInt(datePieces[1], errorCode);
         int day = convertInt(datePieces[2], errorCode);
 
-        //checks if pieces are less than 0
+        //checks if date pieces are less than 0
         if (year < 0 || month < 0 || day < 0){
             if (year < 0) {
                 System.out.println("Error converting date: Year " + year);
@@ -99,8 +101,15 @@ public class Library {
             System.out.println("Using default date (01-jan-1970)");
             return LocalDate.of(1970, 1, 1);
         }
+        //checks for impossible dates/errors
         else{
-            return LocalDate.of(year, month, day);
+            try {
+                return LocalDate.of(year, month, day);
+            } catch (Exception e) {
+                System.out.println("Error converting date: " + year + "-" + month + "-" + day);
+                System.out.println("Using default date (01-jan-1970)");
+                return LocalDate.of(1970, 1, 1);
+            }
         }
     }
 
@@ -122,7 +131,6 @@ public class Library {
             return Code.SUCCESS;
         }
         else{
-            System.out.println("No shelf for " + newBook.getSubject() + " books");
             return Code.SHELF_EXISTS_ERROR;
         }
     }
@@ -149,7 +157,6 @@ public class Library {
         Shelf shelf = getShelf(book.getSubject());
 
         if(shelf == null){
-            System.out.println("no shelf for " + book.getSubject() + " books!");
             return Code.SHELF_EXISTS_ERROR;
         }
         if(shelf.getBookCount(book) < 1){
@@ -171,6 +178,9 @@ public class Library {
 
     //RETURN-BOOK
     public Code returnBook(Reader reader, Book book){
+        if(reader == null){
+            return Code.READER_NOT_IN_LIBRARY_ERROR;
+        }
         if(!reader.hasBook(book)){
             System.out.println(reader.getName() + " doesn't have " + book + " checked out");
             return Code.READER_DOESNT_HAVE_BOOK_ERROR;
@@ -192,6 +202,7 @@ public class Library {
     }
 
     //ADD-BOOK-TO-SHELF
+    @Deprecated
     public Code addBookToShelf(Book book, Shelf shelf){
         Code returnCode = returnBook(book);
         if(returnCode == Code.SUCCESS){
@@ -224,13 +235,13 @@ public class Library {
     }
 
     //GET-BOOK-BY-ISBN
-    public Book getBookByISBN(String string){
+    public Book getBookByISBN(String isbn){
         for(Book book : books.keySet()){
-            if(book.getISBN().equals(string)){
+            if(book.getISBN().equals(isbn)){
                 return book;
             }
         }
-        System.out.println("ERROR: Could not find a book with isbn: " + string);
+        System.out.println("ERROR: Could not find a book with isbn: " + isbn);
         return null;
     }
 
@@ -276,7 +287,7 @@ public class Library {
             return Code.READER_NOT_IN_LIBRARY_ERROR;
         }
 
-        if(reader.getBooks().size() > 0){
+        if(!reader.getBooks().isEmpty()){
             System.out.println(reader.getName() + " must return all books!");
             return Code.READER_STILL_HAS_BOOKS_ERROR;
         }
@@ -320,12 +331,20 @@ public class Library {
     //ADD-SHELF
     public Code addShelf(Shelf shelf){
         //checks for duplicates
-        if(shelves.containsKey(shelf.getSubject())){
-            System.out.println("ERROR: Shelf already exists " + shelf);
-            return Code.SHELF_EXISTS_ERROR;
+        for (String key : shelves.keySet()) {
+            if (key.equalsIgnoreCase(shelf.getSubject())) {
+                System.out.println("ERROR: Shelf already exists " + shelf);
+                return Code.SHELF_EXISTS_ERROR;
+            }
+        }
+        int maxShelfNumber = 0;
+        for (Shelf existingShelf : shelves.values()) {
+            if (existingShelf.getShelfNumber() > maxShelfNumber) {
+                maxShelfNumber = existingShelf.getShelfNumber();
+            }
         }
         //assign next shelf number and add to hashmap
-        shelf.setShelfNumber(shelves.size() + 1);
+        shelf.setShelfNumber(maxShelfNumber + 1);
         shelves.put(shelf.getSubject(), shelf);
 
         //add existing matching books
@@ -342,7 +361,7 @@ public class Library {
 
     //ADD-SHELF
     public Code addShelf(String shelfSubject){
-        Shelf newShelf = new Shelf(shelves.size() + 1, shelfSubject);
+        Shelf newShelf = new Shelf(0, shelfSubject);
         return addShelf(newShelf);
     }
 
@@ -366,8 +385,10 @@ public class Library {
 
     //GET-SHELF
     public Shelf getShelf(String subject){
-        if(shelves.containsKey(subject)){
-            return shelves.get(subject);
+        for (String key : shelves.keySet()) {
+            if (key.equalsIgnoreCase(subject)) {
+                return shelves.get(key);
+            }
         }
         System.out.println("No shelf for " + subject + " books");
         return null;
@@ -387,8 +408,7 @@ public class Library {
     //INIT METHODS
     //INIT
     public Code init(String filename){
-        try{
-            Scanner scan = new Scanner(new File(filename));
+        try (Scanner scan = new Scanner(new File(filename))) {
 
             int bookCount = convertInt(scan.nextLine(), Code.BOOK_COUNT_ERROR);
             if(bookCount < 0){
@@ -423,7 +443,6 @@ public class Library {
             }
             listReaders(true);
 
-            scan.close();
             return Code.SUCCESS;
         }
         catch (FileNotFoundException e){
@@ -455,9 +474,6 @@ public class Library {
                 return Code.PAGE_COUNT_ERROR;
             }
             LocalDate dateLocalDate = convertDate(dateString, Code.DATE_CONVERSION_ERROR);
-            if(dateLocalDate == null){
-                return Code.DATE_CONVERSION_ERROR;
-            }
             Book newBook = new Book(isbn, title, subject, pageCountInt, author, dateLocalDate);
             addBook(newBook);
         }
@@ -468,26 +484,39 @@ public class Library {
         if(readerCount <= 0){
             return Code.READER_COUNT_ERROR;
         }
+
         for(int i = 0; i < readerCount; i++) {
             String line = scan.nextLine();
             String[] tokens = line.split(",");
+
+            if (tokens.length <= Reader.BOOK_COUNT_) {
+                return Code.READER_COUNT_ERROR;
+            }
 
             int cardNumber = convertInt(tokens[Reader.CARD_NUMBER_], Code.READER_COUNT_ERROR);
             String name = tokens[Reader.NAME_];
             String phone = tokens[Reader.PHONE_];
 
             Reader reader = new Reader(cardNumber, name, phone);
-            this.addReader(reader);
+            addReader(reader);
 
             int bookCount = convertInt(tokens[Reader.BOOK_COUNT_], Code.READER_COUNT_ERROR);
+
             for (int j = 0; j < bookCount; j++) {
                 int index = Reader.BOOK_START_ + (j * 2);
+
+                if (index + 1 >= tokens.length) {
+                    return Code.READER_COUNT_ERROR;
+                }
+
                 String isbn = tokens[index];
                 Book book = getBookByISBN(isbn);
+
                 if (book == null) {
                     System.out.println("ERROR");
                     continue;
                 }
+
                 LocalDate dueDate = convertDate(tokens[index + 1], Code.DATE_CONVERSION_ERROR);
                 book.setDueDate(dueDate);
                 checkOutBook(reader, book);
